@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 
-// Load environment variables from .env.local file
 dotenv.config({ path: '.env.local' });
 
 async function bootstrap() {
