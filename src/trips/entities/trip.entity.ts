@@ -1,15 +1,15 @@
 export class Trip {
-  id: string;
-  name: string;
+  id!: string;
+  name!: string;
   description?: string;
-  startLocation: {
+  startLocation!: {
     name: string;
     coordinates: {
       latitude: number;
       longitude: number;
     };
   };
-  endLocation: {
+  endLocation!: {
     name: string;
     coordinates: {
       latitude: number;
@@ -25,9 +25,9 @@ export class Trip {
     };
     duration?: number; // in minutes
   }>;
-  date: Date;
+  date!: Date;
   duration?: number; // in minutes
-  userId: string;
-  createdAt: Date;
+  userId!: string;
+  createdAt!: Date;
   updatedAt?: Date;
 }

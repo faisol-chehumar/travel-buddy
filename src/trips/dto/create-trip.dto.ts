@@ -1,30 +1,37 @@
-import { IsString, IsOptional, IsDate, IsNumber, ValidateNested, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsDate,
+  IsNumber,
+  ValidateNested,
+  IsNotEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class CoordinatesDto {
   @IsNumber()
   @IsNotEmpty()
-  latitude: number;
+  latitude!: number;
 
   @IsNumber()
   @IsNotEmpty()
-  longitude: number;
+  longitude!: number;
 }
 
 class LocationDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @ValidateNested()
   @Type(() => CoordinatesDto)
-  coordinates: CoordinatesDto;
+  coordinates!: CoordinatesDto;
 }
 
 class StopDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsOptional()
@@ -32,7 +39,7 @@ class StopDto {
 
   @ValidateNested()
   @Type(() => CoordinatesDto)
-  coordinates: CoordinatesDto;
+  coordinates!: CoordinatesDto;
 
   @IsNumber()
   @IsOptional()
@@ -42,7 +49,7 @@ class StopDto {
 export class CreateTripDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsOptional()
@@ -50,11 +57,11 @@ export class CreateTripDto {
 
   @ValidateNested()
   @Type(() => LocationDto)
-  startLocation: LocationDto;
+  startLocation!: LocationDto;
 
   @ValidateNested()
   @Type(() => LocationDto)
-  endLocation: LocationDto;
+  endLocation!: LocationDto;
 
   @ValidateNested({ each: true })
   @Type(() => StopDto)
@@ -63,7 +70,7 @@ export class CreateTripDto {
 
   @IsDate()
   @Type(() => Date)
-  date: Date;
+  date!: Date;
 
   @IsNumber()
   @IsOptional()
@@ -71,5 +78,5 @@ export class CreateTripDto {
 
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 }
