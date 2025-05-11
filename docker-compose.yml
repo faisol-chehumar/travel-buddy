@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    image: faisolchehumar/travel-buddy
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # - DATABASE_URL=${DATABASE_URL}
+      # - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - app-network
+
+  # Optional: Add database, redis, etc.
+  # database:
+  #   image: mongo:latest
+  #   restart: always
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   networks:
+  #     - app-network
+
+networks:
+  app-network:
+
+# volumes:
+#   mongodb_data:
