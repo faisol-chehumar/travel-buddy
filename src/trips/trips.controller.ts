@@ -7,16 +7,20 @@ import {
   Param,
   Delete,
   Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import { TripsService } from './trips.service';
+import { TripsService } from './services/trips.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
+import { TripPlanDto } from './dto/trip-plan.dto';
 
 @Controller('trips')
 export class TripsController {
   constructor(private readonly tripsService: TripsService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   create(@Body() createTripDto: CreateTripDto) {
     return this.tripsService.create(createTripDto);
   }
@@ -32,6 +36,7 @@ export class TripsController {
   }
 
   @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
     return this.tripsService.update(id, updateTripDto);
   }
@@ -39,5 +44,11 @@ export class TripsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.tripsService.remove(id);
+  }
+
+  @Post('trip-plan')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  planTrip(@Body() tripPlanDto: TripPlanDto) {
+    return this.tripsService.planTrip(tripPlanDto);
   }
 }
