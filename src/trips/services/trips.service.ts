@@ -5,11 +5,13 @@ import { Model } from 'mongoose';
 import { RouteXlService } from 'src/route-xl/route-xl.service';
 import { Location } from 'src/route-xl/interfaces';
 import { GooglePlacesService } from 'src/google-map/services/google-places.service';
+import { OpenAiService } from 'src/openai/services/openai.service';
 
 import { CreateTripDto, LocationDto, StopDto } from '../dto/create-trip.dto';
 import { UpdateTripDto } from '../dto/update-trip.dto';
 import { Trip, TripDocument } from '../schemas/trip.schema';
-import { CreateOneDayPlanDto } from '../dto';
+import { QueryOneDayPlanDto } from '../dto';
+import { TripLocation } from 'src/openai/interfaces';
 
 @Injectable()
 export class TripsService {
@@ -19,6 +21,7 @@ export class TripsService {
     @InjectModel(Trip.name) private tripModel: Model<TripDocument>,
     private readonly routeXl: RouteXlService,
     private readonly googlePlacesService: GooglePlacesService,
+    private readonly openAiService: OpenAiService,
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<Trip> {
@@ -78,9 +81,18 @@ export class TripsService {
     }
   }
 
-  async createOneDayPlan(
-    createOneDayPlanDto: CreateOneDayPlanDto,
-  ): Promise<void> {}
+  async getOneDayPlan(
+    queryOneDayPlanDto: QueryOneDayPlanDto,
+  ): Promise<TripLocation[]> {
+    const { startPlace, destinationPlace } = queryOneDayPlanDto;
+
+    const tripLocations = await this.openAiService.generateOneDayTripLocation(
+      startPlace,
+      destinationPlace,
+    );
+
+    return tripLocations;
+  }
 
   private mapToRouteXlLocations(
     start: LocationDto,

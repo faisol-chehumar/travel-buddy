@@ -83,4 +83,35 @@ Currently, the application has a basic structure with:
 
 ## Environment Configuration
 
-The application appears to use environment variables (e.g., PORT in main.ts). When developing, you may need to create a `.env.dev` file with necessary environment variables.
+The application uses environment variables for configuration. Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Server Configuration
+PORT=3000
+
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/travel-buddy
+
+# API Keys
+ROUTE_XL_USER=your_routexl_username
+ROUTE_XL_PASS=your_routexl_password
+GOOGLE_API_KEY=your_google_api_key
+OPENAI_API_KEY=your_openai_api_key
+```
+
+### Required API Keys
+
+The application integrates with the following external services:
+
+1. **Google Places API** - For geocoding and location search
+   - Create an API key in the [Google Cloud Console](https://console.cloud.google.com/)
+   - Enable the Places API
+   - Set as `GOOGLE_API_KEY` in your environment
+
+2. **RouteXL API** - For route optimization
+   - Register for an account at [RouteXL](https://www.routexl.com/)
+   - Set your username as `ROUTE_XL_USER` and password as `ROUTE_XL_PASS`
+
+3. **OpenAI API** - For generating trip recommendations
+   - Get an API key from [OpenAI Platform](https://platform.openai.com/)
+   - Set as `OPENAI_API_KEY` in your environment

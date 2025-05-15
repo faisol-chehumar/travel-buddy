@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class CreateOneDayPlanDto {
+export class QueryOneDayPlanDto {
   @IsString()
   @IsNotEmpty()
   startPlace!: string;

@@ -1,4 +1,4 @@
-import { CreateOneDayPlanDto } from './dto/create-one-day-plan.dto';
+import { QueryOneDayPlanDto } from './dto/query-one-day-plan.dto';
 import {
   Controller,
   Get,
@@ -8,8 +8,6 @@ import {
   Param,
   Delete,
   Query,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { TripsService } from './services/trips.service';
 import { CreateTripDto } from './dto/create-trip.dto';
@@ -19,8 +17,12 @@ import { UpdateTripDto } from './dto/update-trip.dto';
 export class TripsController {
   constructor(private readonly tripsService: TripsService) {}
 
+  @Get('one-day-trip')
+  createOneDayPlan(@Query() queryOneDayPlanDto: QueryOneDayPlanDto) {
+    return this.tripsService.getOneDayPlan(queryOneDayPlanDto);
+  }
+
   @Post()
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   create(@Body() createTripDto: CreateTripDto) {
     return this.tripsService.create(createTripDto);
   }
@@ -36,7 +38,6 @@ export class TripsController {
   }
 
   @Patch(':id')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   update(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
     return this.tripsService.update(id, updateTripDto);
   }
@@ -44,11 +45,5 @@ export class TripsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.tripsService.remove(id);
-  }
-
-  @Post('one-day-trip')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  createOneDayPlan(@Body() createOneDayPlan: CreateOneDayPlanDto) {
-    return this.tripsService.createOneDayPlan(createOneDayPlan);
   }
 }

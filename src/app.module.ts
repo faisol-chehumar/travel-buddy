@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { RouteXlModule } from './route-xl/route-xl.module';
 import { DatabaseModule } from './database/database.module';
 import { GoogleMapModule } from './google-map/maps.module';
+import { OpenAiModule } from './openai/openai.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { GoogleMapModule } from './google-map/maps.module';
     HealthModule,
     RouteXlModule,
     GoogleMapModule,
+    OpenAiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
