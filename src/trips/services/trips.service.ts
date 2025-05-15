@@ -1,19 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { RouteXlService } from 'src/route-xl/route-xl.service';
 import { Location } from 'src/route-xl/interfaces';
 
 import { CreateTripDto, LocationDto, StopDto } from '../dto/create-trip.dto';
 import { UpdateTripDto } from '../dto/update-trip.dto';
-import { Trip } from '../entities/trip.entity';
+import { Trip, TripDocument } from '../schemas/trip.schema';
 
 @Injectable()
 export class TripsService {
-  // In-memory storage for trips until we integrate a database
-  private trips: Trip[] = [];
-
-  constructor(private readonly routeXl: RouteXlService) {}
+  constructor(
+    @InjectModel(Trip.name) private tripModel: Model<TripDocument>,
+    private readonly routeXl: RouteXlService,
+  ) {}
 
   async create(createTripDto: CreateTripDto): Promise<Trip> {
     const optimizedRoute = await this.routeXl.getOptimizeRoute({
@@ -29,49 +30,47 @@ export class TripsService {
       createTripDto.stops,
     );
 
-    const newTrip: Trip = {
-      id: uuidv4(),
+    const createdTrip = new this.tripModel({
       ...createTripDto,
       stops: routeLocation,
-      createdAt: new Date(),
-    };
-    this.trips.push(newTrip);
+    });
 
-    return newTrip;
+    return createdTrip.save();
   }
 
-  findAll(userId?: string): Trip[] {
-    return userId
-      ? this.trips.filter((trip) => trip.userId === userId)
-      : this.trips;
+  async findAll(userId?: string): Promise<Trip[]> {
+    if (userId) {
+      return this.tripModel.find({ userId }).exec();
+    }
+    return this.tripModel.find().exec();
   }
 
-  findOne(id: string): Trip {
-    const trip = this.trips.find((trip) => trip.id === id);
-    if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`);
+  async findOne(id: string): Promise<Trip> {
+    const trip = await this.tripModel.findById(id).exec();
+    if (!trip) {
+      throw new NotFoundException(`Trip with ID ${id} not found`);
+    }
     return trip;
   }
 
-  update(id: string, updateTripDto: UpdateTripDto): Trip {
-    const tripIndex = this.trips.findIndex((trip) => trip.id === id);
-    if (tripIndex === -1)
+  async update(id: string, updateTripDto: UpdateTripDto): Promise<Trip> {
+    const updatedTrip = await this.tripModel
+      .findByIdAndUpdate(id, updateTripDto, { new: true })
+      .exec();
+
+    if (!updatedTrip) {
       throw new NotFoundException(`Trip with ID ${id} not found`);
+    }
 
-    const updatedTrip = {
-      ...this.trips[tripIndex],
-      ...updateTripDto,
-      updatedAt: new Date(),
-    };
-
-    this.trips[tripIndex] = updatedTrip;
     return updatedTrip;
   }
 
-  remove(id: string): void {
-    const tripIndex = this.trips.findIndex((trip) => trip.id === id);
-    if (tripIndex === -1)
+  async remove(id: string): Promise<void> {
+    const result = await this.tripModel.findByIdAndDelete(id).exec();
+
+    if (!result) {
       throw new NotFoundException(`Trip with ID ${id} not found`);
-    this.trips.splice(tripIndex, 1);
+    }
   }
 
   private mapToRouteXlLocations(

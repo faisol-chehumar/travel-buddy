@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { TripsModule } from './trips/trips.module';
 import { HealthModule } from './health/health.module';
 import { RouteXlModule } from './route-xl/route-xl.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { RouteXlModule } from './route-xl/route-xl.module';
       isGlobal: true,
       envFilePath: '.env.local',
     }),
+    DatabaseModule,
     TripsModule,
     HealthModule,
     RouteXlModule,
