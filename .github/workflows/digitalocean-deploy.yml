@@ -1,0 +1,55 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/travel-buddy:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/travel-buddy:${{ github.sha }}
+
+      - name: Deploy to DigitalOcean
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DIGITALOCEAN_IP }}
+          username: ${{ secrets.DIGITALOCEAN_USER }}
+          key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+          script: |
+            # Pull the latest Docker image
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/travel-buddy:latest
+
+            # Stop existing container
+            docker stop travel-buddy || true
+            docker rm travel-buddy || true
+
+            # Run new container
+            docker run -d \
+              --name travel-buddy \
+              -p 3000:3000 \
+              -e NODE_ENV=production \
+              -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              ${{ secrets.DOCKERHUB_USERNAME }}/travel-buddy:latest
