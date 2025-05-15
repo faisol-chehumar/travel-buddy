@@ -61,14 +61,16 @@ export class GooglePlacesService {
   }
 
   async searchMultiplePlaces(
-    placeNames: PlaceSearchRequest[],
+    placeNames: string[],
   ): Promise<PlaceSearchResponse[]> {
     if (!placeNames || placeNames.length === 0) {
       return [];
     }
 
     const results = await Promise.all(
-      placeNames.map((name) => this.searchPlaces(name).catch(() => null)),
+      placeNames.map((name) =>
+        this.searchPlaces({ textQuery: name }).catch(() => null),
+      ),
     );
 
     return results.filter(

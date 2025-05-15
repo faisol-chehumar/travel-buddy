@@ -1,5 +1,5 @@
-import { Location } from './location.interface';
+import { RouteXlLocation } from './location.interface';
 
 export interface RouteOptimizeRequest {
-  locations: Location[];
+  locations: RouteXlLocation[];
 }

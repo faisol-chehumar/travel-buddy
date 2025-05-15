@@ -8,25 +8,31 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+import { LocationDto } from './location.dto';
+
 export class CoordinatesDto {
   @IsNumber()
-  @IsNotEmpty()
-  latitude!: number;
+  @IsOptional()
+  latitude?: number;
 
   @IsNumber()
-  @IsNotEmpty()
-  longitude!: number;
+  @IsOptional()
+  longitude?: number;
 }
 
-export class LocationDto {
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
+// export class LocationDto {
+//   @IsString()
+//   @IsNotEmpty()
+//   name!: string;
 
-  @ValidateNested()
-  @Type(() => CoordinatesDto)
-  coordinates!: CoordinatesDto;
-}
+//   @IsString()
+//   @IsNotEmpty()
+//   district!: string;
+
+//   @IsString()
+//   @IsNotEmpty()
+//   province!: string;
+// }
 
 export class StopDto {
   @IsString()
@@ -63,11 +69,6 @@ export class CreateTripDto {
   @Type(() => LocationDto)
   endLocation!: LocationDto;
 
-  @ValidateNested({ each: true })
-  @Type(() => StopDto)
-  @IsNotEmpty()
-  stops!: StopDto[];
-
   @IsDate()
   @Type(() => Date)
   date!: Date;
@@ -79,4 +80,9 @@ export class CreateTripDto {
   @IsString()
   @IsNotEmpty()
   userId!: string;
+
+  @ValidateNested({ each: true })
+  @Type(() => LocationDto)
+  @IsNotEmpty()
+  tripLocation!: LocationDto[];
 }

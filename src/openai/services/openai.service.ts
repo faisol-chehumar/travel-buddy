@@ -57,7 +57,7 @@ export class OpenAiService {
       messages: [
         {
           role: 'system',
-          content: `Act as a trip planner API. Given a JSON payload with { start, destination, end }, return a JSON array of 4–6 recommended locations to visit along the route, including stops between and at the destination. Each location must include: name, short_description, lat, lng, open, and close (in "HH:mm"). Respond only with JSON.`,
+          content: `Act as a trip planner API. Given a JSON payload with { start, destination, end }, return a JSON array of 4–6 recommended locations to visit along the route, including stops between and at the destination. Each location must include: name, short_description, district, province, open, and close (in "HH:mm"). Respond only with JSON.`,
         },
         {
           role: 'user',

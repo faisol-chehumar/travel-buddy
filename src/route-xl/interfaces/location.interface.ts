@@ -5,7 +5,7 @@ import { Restrictions } from './restriction.type';
 // – due: latest time the location must be visited (minutes, greater than 0).
 // – before: index number of the location that is the delivery point for this location.
 // – after: index number of the location that is the pickup point for this location.
-export interface Location {
+export interface RouteXlLocation {
   address: string;
   lat: number;
   lng: number;

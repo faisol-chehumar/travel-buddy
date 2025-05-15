@@ -59,8 +59,9 @@ export interface TripRecommendation {
 export interface TripLocation {
   name: string;
   short_description: string;
-  lat: number;
-  lng: number;
+  district: string;
+  province: string;
   open: string;
   close: string;
+  duration?: number;
 }

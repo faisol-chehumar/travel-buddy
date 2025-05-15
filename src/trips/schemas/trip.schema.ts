@@ -19,7 +19,7 @@ class Location {
   coordinates!: Coordinates;
 }
 
-class Stop {
+class TripLocation {
   @Prop({ required: true })
   name!: string;
 
@@ -47,8 +47,8 @@ export class Trip {
   @Prop({ required: true, type: Location })
   endLocation!: Location;
 
-  @Prop({ type: [Stop] })
-  stops!: Stop[];
+  @Prop({ type: [TripLocation] })
+  tripLocation!: TripLocation[];
 
   @Prop({ required: true, type: Date })
   date!: Date;

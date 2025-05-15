@@ -3,15 +3,28 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { RouteXlService } from 'src/route-xl/route-xl.service';
-import { Location } from 'src/route-xl/interfaces';
+import { RouteXlLocation } from 'src/route-xl/interfaces';
 import { GooglePlacesService } from 'src/google-map/services/google-places.service';
 import { OpenAiService } from 'src/openai/services/openai.service';
 
-import { CreateTripDto, LocationDto, StopDto } from '../dto/create-trip.dto';
+import { CreateTripDto } from '../dto/create-trip.dto';
 import { UpdateTripDto } from '../dto/update-trip.dto';
 import { Trip, TripDocument } from '../schemas/trip.schema';
 import { QueryOneDayPlanDto } from '../dto';
 import { TripLocation } from 'src/openai/interfaces';
+import { LocationDto } from '../dto/location.dto';
+
+export interface MappedTripLocation {
+  name: string;
+  description: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  duration?: number;
+  province: string;
+  district: string;
+}
 
 @Injectable()
 export class TripsService {
@@ -25,22 +38,44 @@ export class TripsService {
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<Trip> {
-    const optimizedRoute = await this.routeXl.getOptimizeRoute({
-      locations: this.mapToRouteXlLocations(
-        createTripDto.startLocation,
-        createTripDto.stops,
-        createTripDto.endLocation,
-      ),
+    const allLocations = [
+      createTripDto.startLocation,
+      ...createTripDto.tripLocation,
+      createTripDto.endLocation,
+    ];
+
+    const placeNames = allLocations.map(
+      (l) => `${l.name}, ${l.district}, ${l.province}`,
+    );
+
+    const mapLatLngTripLocation =
+      await this.googlePlacesService.searchMultiplePlaces(placeNames);
+
+    console.log('mapLatLngTripLocation', mapLatLngTripLocation);
+
+    const tripLocations = mapLatLngTripLocation.map((m, index) => ({
+      name: allLocations[index].name,
+      description: allLocations[index].short_description,
+      coordinates: {
+        latitude: m.places[0].location.latitude,
+        longitude: m.places[0].location.longitude,
+      },
+      district: allLocations[index].district,
+      province: allLocations[index].province,
+    })) as MappedTripLocation[];
+
+    const optimizedTripRoute = await this.routeXl.getOptimizeRoute({
+      locations: this.mapToRouteXlLocations(tripLocations),
     });
 
-    const routeLocation = this.mapToTripStops(
-      optimizedRoute.route,
-      createTripDto.stops,
+    const routeLocation = this.mapToTripLocations(
+      optimizedTripRoute.route,
+      tripLocations,
     );
 
     const createdTrip = new this.tripModel({
       ...createTripDto,
-      stops: routeLocation,
+      tripLocation: routeLocation,
     });
 
     return createdTrip.save();
@@ -95,47 +130,35 @@ export class TripsService {
   }
 
   private mapToRouteXlLocations(
-    start: LocationDto,
-    stops: StopDto[],
-    end: LocationDto,
-  ): Location[] {
-    const startLocation: Location = {
-      address: start.name,
-      lat: start.coordinates.latitude,
-      lng: start.coordinates.longitude,
-    };
-
-    const endLocation: Location = {
-      address: end.name,
-      lat: end.coordinates.latitude,
-      lng: end.coordinates.longitude,
-    };
-
-    const stopLocations: Location[] =
-      stops?.map((s) => ({
+    locations: MappedTripLocation[],
+  ): RouteXlLocation[] {
+    const mapLocations: RouteXlLocation[] =
+      locations?.map((s) => ({
         address: s.name,
         lat: s.coordinates.latitude,
         lng: s.coordinates.longitude,
       })) ?? [];
 
-    return [startLocation, ...stopLocations, endLocation];
+    return mapLocations;
   }
 
-  private mapToTripStops(
-    optimizedRoute: Record<string, { name: string }>,
-    originalStops: StopDto[],
+  private mapToTripLocations(
+    optimizedTripRoute: Record<string, { name: string }>,
+    originalTripLocations: LocationDto[],
   ): LocationDto[] {
-    return Object.values(optimizedRoute).reduce<LocationDto[]>(
+    return Object.values(optimizedTripRoute).reduce<LocationDto[]>(
       (acc, routeItem) => {
-        const found = originalStops.find(
+        const found = originalTripLocations.find(
           (location) => location.name === routeItem.name,
         );
         if (found) {
           acc.push({
             name: found.name,
+            district: found.district,
+            province: found.province,
             coordinates: {
-              latitude: found.coordinates.latitude,
-              longitude: found.coordinates.longitude,
+              latitude: found.coordinates?.latitude,
+              longitude: found.coordinates?.longitude,
             },
           });
         }
