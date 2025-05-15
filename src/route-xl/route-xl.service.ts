@@ -26,6 +26,12 @@ export class RouteXlService {
   ) {
     this.username = this.configService.get<string>('ROUTE_XL_USER') || '';
     this.password = this.configService.get<string>('ROUTE_XL_PASS') || '';
+
+    if (!this.username || !this.password) {
+      this.logger.warn(
+        'Route XL credential not found in environment variables',
+      );
+    }
   }
 
   async getOptimizeRoute(

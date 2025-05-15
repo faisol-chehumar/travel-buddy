@@ -1,19 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { RouteXlService } from 'src/route-xl/route-xl.service';
 import { Location } from 'src/route-xl/interfaces';
+import { GooglePlacesService } from 'src/google-map/services/google-places.service';
 
 import { CreateTripDto, LocationDto, StopDto } from '../dto/create-trip.dto';
 import { UpdateTripDto } from '../dto/update-trip.dto';
 import { Trip, TripDocument } from '../schemas/trip.schema';
+import { CreateOneDayPlanDto } from '../dto';
 
 @Injectable()
 export class TripsService {
+  private readonly logger = new Logger(TripsService.name);
+
   constructor(
     @InjectModel(Trip.name) private tripModel: Model<TripDocument>,
     private readonly routeXl: RouteXlService,
+    private readonly googlePlacesService: GooglePlacesService,
   ) {}
 
   async create(createTripDto: CreateTripDto): Promise<Trip> {
@@ -72,6 +77,10 @@ export class TripsService {
       throw new NotFoundException(`Trip with ID ${id} not found`);
     }
   }
+
+  async createOneDayPlan(
+    createOneDayPlanDto: CreateOneDayPlanDto,
+  ): Promise<void> {}
 
   private mapToRouteXlLocations(
     start: LocationDto,

@@ -7,6 +7,7 @@ import { TripsModule } from './trips/trips.module';
 import { HealthModule } from './health/health.module';
 import { RouteXlModule } from './route-xl/route-xl.module';
 import { DatabaseModule } from './database/database.module';
+import { GoogleMapModule } from './google-map/maps.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
     TripsModule,
     HealthModule,
     RouteXlModule,
+    GoogleMapModule,
   ],
   controllers: [AppController],
   providers: [AppService],

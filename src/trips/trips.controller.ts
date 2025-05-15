@@ -1,3 +1,4 @@
+import { CreateOneDayPlanDto } from './dto/create-one-day-plan.dto';
 import {
   Controller,
   Get,
@@ -43,5 +44,11 @@ export class TripsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.tripsService.remove(id);
+  }
+
+  @Post('one-day-trip')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  createOneDayPlan(@Body() createOneDayPlan: CreateOneDayPlanDto) {
+    return this.tripsService.createOneDayPlan(createOneDayPlan);
   }
 }
