@@ -1,3 +1,4 @@
+import { QueryOneDayPlanDto } from './dto/query-one-day-plan.dto';
 import {
   Controller,
   Get,
@@ -8,13 +9,18 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { TripsService } from './trips.service';
+import { TripsService } from './services/trips.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
 
 @Controller('trips')
 export class TripsController {
   constructor(private readonly tripsService: TripsService) {}
+
+  @Get('one-day-trip')
+  createOneDayPlan(@Query() queryOneDayPlanDto: QueryOneDayPlanDto) {
+    return this.tripsService.getOneDayPlan(queryOneDayPlanDto);
+  }
 
   @Post()
   create(@Body() createTripDto: CreateTripDto) {
