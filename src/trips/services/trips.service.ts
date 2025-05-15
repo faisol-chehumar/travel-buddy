@@ -51,8 +51,6 @@ export class TripsService {
     const mapLatLngTripLocation =
       await this.googlePlacesService.searchMultiplePlaces(placeNames);
 
-    console.log('mapLatLngTripLocation', mapLatLngTripLocation);
-
     const tripLocations = mapLatLngTripLocation.map((m, index) => ({
       name: allLocations[index].name,
       description: allLocations[index].short_description,
