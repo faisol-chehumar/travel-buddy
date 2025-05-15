@@ -13,7 +13,6 @@ import {
 import { TripsService } from './services/trips.service';
 import { CreateTripDto } from './dto/create-trip.dto';
 import { UpdateTripDto } from './dto/update-trip.dto';
-import { TripPlanDto } from './dto/trip-plan.dto';
 
 @Controller('trips')
 export class TripsController {
@@ -44,11 +43,5 @@ export class TripsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.tripsService.remove(id);
-  }
-
-  @Post('trip-plan')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  planTrip(@Body() tripPlanDto: TripPlanDto) {
-    return this.tripsService.planTrip(tripPlanDto);
   }
 }

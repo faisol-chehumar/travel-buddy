@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class CoordinatesDto {
+export class CoordinatesDto {
   @IsNumber()
   @IsNotEmpty()
   latitude!: number;
@@ -18,7 +18,7 @@ class CoordinatesDto {
   longitude!: number;
 }
 
-class LocationDto {
+export class LocationDto {
   @IsString()
   @IsNotEmpty()
   name!: string;
@@ -28,7 +28,7 @@ class LocationDto {
   coordinates!: CoordinatesDto;
 }
 
-class StopDto {
+export class StopDto {
   @IsString()
   @IsNotEmpty()
   name!: string;
@@ -65,8 +65,8 @@ export class CreateTripDto {
 
   @ValidateNested({ each: true })
   @Type(() => StopDto)
-  @IsOptional()
-  stops?: StopDto[];
+  @IsNotEmpty()
+  stops!: StopDto[];
 
   @IsDate()
   @Type(() => Date)

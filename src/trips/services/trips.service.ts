@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateTripDto } from '../dto/create-trip.dto';
+
+import { RouteXlService } from 'src/route-xl/route-xl.service';
+import { Location } from 'src/route-xl/interfaces';
+
+import { CreateTripDto, LocationDto, StopDto } from '../dto/create-trip.dto';
 import { UpdateTripDto } from '../dto/update-trip.dto';
-import { TripPlanDto } from '../dto/trip-plan.dto';
 import { Trip } from '../entities/trip.entity';
 
 @Injectable()
@@ -10,40 +13,49 @@ export class TripsService {
   // In-memory storage for trips until we integrate a database
   private trips: Trip[] = [];
 
-  create(createTripDto: CreateTripDto): Trip {
+  constructor(private readonly routeXl: RouteXlService) {}
+
+  async create(createTripDto: CreateTripDto): Promise<Trip> {
+    const optimizedRoute = await this.routeXl.getOptimizeRoute({
+      locations: this.mapToRouteXlLocations(
+        createTripDto.startLocation,
+        createTripDto.stops,
+        createTripDto.endLocation,
+      ),
+    });
+
+    const routeLocation = this.mapToTripStops(
+      optimizedRoute.route,
+      createTripDto.stops,
+    );
+
     const newTrip: Trip = {
       id: uuidv4(),
       ...createTripDto,
+      stops: routeLocation,
       createdAt: new Date(),
     };
-
     this.trips.push(newTrip);
+
     return newTrip;
   }
 
   findAll(userId?: string): Trip[] {
-    if (userId) {
-      return this.trips.filter((trip) => trip.userId === userId);
-    }
-    return this.trips;
+    return userId
+      ? this.trips.filter((trip) => trip.userId === userId)
+      : this.trips;
   }
 
   findOne(id: string): Trip {
     const trip = this.trips.find((trip) => trip.id === id);
-
-    if (!trip) {
-      throw new NotFoundException(`Trip with ID ${id} not found`);
-    }
-
+    if (!trip) throw new NotFoundException(`Trip with ID ${id} not found`);
     return trip;
   }
 
   update(id: string, updateTripDto: UpdateTripDto): Trip {
     const tripIndex = this.trips.findIndex((trip) => trip.id === id);
-
-    if (tripIndex === -1) {
+    if (tripIndex === -1)
       throw new NotFoundException(`Trip with ID ${id} not found`);
-    }
 
     const updatedTrip = {
       ...this.trips[tripIndex],
@@ -57,60 +69,59 @@ export class TripsService {
 
   remove(id: string): void {
     const tripIndex = this.trips.findIndex((trip) => trip.id === id);
-
-    if (tripIndex === -1) {
+    if (tripIndex === -1)
       throw new NotFoundException(`Trip with ID ${id} not found`);
-    }
-
     this.trips.splice(tripIndex, 1);
   }
 
-  planTrip(tripPlanDto: TripPlanDto) {
-    // This would eventually integrate with external services like Google Maps API
-    // and possibly an AI service for suggestions
-
-    // For now, we'll return a simple response with the origin and destination
-    return {
-      id: uuidv4(),
-      status: 'planned',
-      origin: tripPlanDto.origin,
-      destination: tripPlanDto.destination,
-      date: tripPlanDto.date || new Date().toISOString(),
-      estimatedDuration: 60, // Mock duration in minutes
-      distance: 10, // Mock distance in kilometers
-      createdAt: new Date().toISOString(),
-      // In a real application, we would calculate the route and optimize based on
-      // traffic, opening hours, etc.
-      route: {
-        polyline: 'mock_polyline_data',
-        steps: [
-          {
-            instruction: `Start from ${tripPlanDto.origin.name}`,
-            distance: 0,
-            duration: 0,
-          },
-          {
-            instruction: `Travel to ${tripPlanDto.destination.name}`,
-            distance: 10,
-            duration: 60,
-          },
-        ],
-      },
-      // In a real application, we would get AI-powered suggestions here
-      suggestedStops: [
-        {
-          name: 'Mock Coffee Shop',
-          type: 'cafe',
-          rating: 4.5,
-          distanceFromRoute: 0.2,
-        },
-        {
-          name: 'Mock Restaurant',
-          type: 'restaurant',
-          rating: 4.2,
-          distanceFromRoute: 0.5,
-        },
-      ],
+  private mapToRouteXlLocations(
+    start: LocationDto,
+    stops: StopDto[],
+    end: LocationDto,
+  ): Location[] {
+    const startLocation: Location = {
+      address: start.name,
+      lat: start.coordinates.latitude,
+      lng: start.coordinates.longitude,
     };
+
+    const endLocation: Location = {
+      address: end.name,
+      lat: end.coordinates.latitude,
+      lng: end.coordinates.longitude,
+    };
+
+    const stopLocations: Location[] =
+      stops?.map((s) => ({
+        address: s.name,
+        lat: s.coordinates.latitude,
+        lng: s.coordinates.longitude,
+      })) ?? [];
+
+    return [startLocation, ...stopLocations, endLocation];
+  }
+
+  private mapToTripStops(
+    optimizedRoute: Record<string, { name: string }>,
+    originalStops: StopDto[],
+  ): LocationDto[] {
+    return Object.values(optimizedRoute).reduce<LocationDto[]>(
+      (acc, routeItem) => {
+        const found = originalStops.find(
+          (location) => location.name === routeItem.name,
+        );
+        if (found) {
+          acc.push({
+            name: found.name,
+            coordinates: {
+              latitude: found.coordinates.latitude,
+              longitude: found.coordinates.longitude,
+            },
+          });
+        }
+        return acc;
+      },
+      [],
+    );
   }
 }

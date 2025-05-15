@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TripsModule } from './trips/trips.module';
 import { HealthModule } from './health/health.module';
+import { RouteXlModule } from './route-xl/route-xl.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { HealthModule } from './health/health.module';
     }),
     TripsModule,
     HealthModule,
+    RouteXlModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { TripsService } from './trips.service';
-import { TripPlanDto } from '../dto/trip-plan.dto';
 
 describe('TripsService', () => {
   let service: TripsService;
@@ -16,30 +15,6 @@ describe('TripsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-  });
-
-  describe('planTrip', () => {
-    it('should return a trip plan', () => {
-      const tripPlanDto: TripPlanDto = {
-        origin: {
-          name: 'Origin Place',
-        },
-        destination: {
-          name: 'Destination Place',
-        },
-      };
-
-      const result = service.planTrip(tripPlanDto);
-
-      expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('status', 'planned');
-      expect(result).toHaveProperty('origin');
-      expect(result).toHaveProperty('destination');
-      expect(result.origin.name).toBe('Origin Place');
-      expect(result.destination.name).toBe('Destination Place');
-      expect(result).toHaveProperty('route');
-      expect(result).toHaveProperty('suggestedStops');
-    });
   });
 
   describe('CRUD operations', () => {
